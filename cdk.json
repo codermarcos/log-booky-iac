@@ -1,5 +1,6 @@
 {
-  "app": "npx ts-node --prefer-ts-exts bin/backend.ts",
+  "app": "node -r @swc-node/register ./bin/log-booky.ts",
+  "autoCleanOutdatedAssetsBefore": "3days",
   "watch": {
     "include": [
       "**"
@@ -18,6 +19,7 @@
   },
   "context": {
     "@aws-cdk/aws-lambda:recognizeLayerVersion": true,
+    "@aws-cdk/core:bootstrapQualifier": "aacec38c",
     "@aws-cdk/core:checkSecretUsage": true,
     "@aws-cdk/core:target-partitions": [
       "aws",
