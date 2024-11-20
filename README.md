@@ -1,6 +1,8 @@
 # 🪽 Log Booky
 
-The **Acompanha Me Backend** provides a structure to save authenticate and save models to create a catalog.
+The **Log Booky** provides a structure to save student jumps and instructors sign the student jumps.
+
+It is a project for a dropzone that I'm used to jumping, that I did as an activity for my major.
 
 This is a simple serverless application built in [Typescript][ts-doc] and uses [Node.js 20 runtime][node-doc]. It consists of an 
 [Amazon Cognito](https://aws.amazon.com/cognito/) to authenticate user that retrive data at [Amazon DynamoDB](https://aws.amazon.com/dynamodb/).
@@ -13,14 +15,13 @@ This repository uses:
 | -------------------------------------------- | ------------------ | ---------------- |
 | [![node-version]][node-download]             | Javascript Runtime | [📚][node-doc]   |
 | [![aws-version]][aws-download]               | AWS CLI            | [📚][aws-doc]    |
-| [![sam-version]][sam-download]               | SAM CLI            | [📚][sam-doc]    |
 
 ## 🔨 Project setup
 
 1. To **clone repository** you need to have [git][git-download] installed:
 
 ```bash
-git clone git@github.com:codermarcos/acompanhame-backend.git
+git clone git@github.com:codermarcos/log-booky.git
 ```
 
 2. To **install dependencies** you need to have [NodeJS][node-download] installed:
@@ -85,6 +86,7 @@ This project follow this folders organization:
 
 * `./bin` has the instance for the stack
 * `./lib` has code to create the infrastructure (ex.: Cognito, Dynamo, maybe an S3 etc...)
+* `cdk.json` file tells the CDK Toolkit how to execute the app
 
 ### 💪 Dev Team
 
@@ -104,20 +106,3 @@ This project exists thanks to all these people.
 [aws-doc]: https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html
 [ts-doc]: https://www.typescriptlang.org/
 [cdk-doc]: https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html
-
-
-
-# Welcome to your CDK TypeScript project
-
-This is a blank project for CDK development with TypeScript.
-
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
-
-## Useful commands
-
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `npx cdk deploy`  deploy this stack to your default AWS account/region
-* `npx cdk diff`    compare deployed stack with current state
-* `npx cdk synth`   emits the synthesized CloudFormation template
