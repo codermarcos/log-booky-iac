@@ -15,10 +15,12 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noImplicitReturns": true,
+    "esModuleInterop": true,
     "noFallthroughCasesInSwitch": false,
     "inlineSourceMap": true,
     "inlineSources": true,
     "experimentalDecorators": true,
+    "resolveJsonModule": true,
     "strictPropertyInitialization": false,
     "typeRoots": [
       "./node_modules/@types"
