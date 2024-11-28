@@ -1,17 +1,17 @@
-import type { Construct } from "constructs";
+import type { Construct } from 'constructs';
 
 import {
   AttributeType,
   BillingMode,
   ProjectionType,
   Table,
-} from "aws-cdk-lib/aws-dynamodb";
+} from 'aws-cdk-lib/aws-dynamodb';
 import {
   type UserPool,
   CfnIdentityPool,
   UserPoolClient,
   VerificationEmailStyle,
-} from "aws-cdk-lib/aws-cognito";
+} from 'aws-cdk-lib/aws-cognito';
 import {
   type Environment,
   type StackProps,
@@ -21,8 +21,8 @@ import {
   CfnOutput,
   RemovalPolicy,
   Stack,
-} from "aws-cdk-lib";
-import type { Role } from "aws-cdk-lib/aws-iam";
+} from 'aws-cdk-lib';
+import type { Role } from 'aws-cdk-lib/aws-iam';
 
 export type EnvironmentVariables = Environment & {
   frontendHost: string;
@@ -43,37 +43,42 @@ export class LogBookyStack extends Stack {
     private props: StackProps & { env: EnvironmentVariables }
   ) {
     super(scope, id, props);
-
-    this.createCognito();
     this.createDatabase();
+    this.createCognito();
+    this.createRole();
+    this.attachRole();
 
-    this.tableJumps.grantReadWriteData(this.userRoleAuthenticated);
+    // this.tableJumps.grant(this.userRoleAuthenticated);
 
-    new CfnOutput(this, "tableJumps", {
+    new CfnOutput(this, 'tableJumps', {
       value: this.tableJumps.tableName,
     });
 
-    new CfnOutput(this, "tableSignature", {
+    new CfnOutput(this, 'tableSignature', {
       value: this.tableSignatures.tableName,
     });
 
-    new CfnOutput(this, "cognitoUserPoolClientId", {
+    new CfnOutput(this, 'cognitoUserPoolClientId', {
       value: this.cognitoUserPoolClient.userPoolClientId,
     });
 
-    new CfnOutput(this, "cognitoUserPoolId", {
+    new CfnOutput(this, 'cognitoUserPoolId', {
       value: this.cognitoUserPool.userPoolId,
+    });
+
+    new CfnOutput(this, 'cognitoIdentityPoolRef', {
+      value: this.cognitoIdentityPool.ref,
     });
   }
 
   createDatabase() {
-    this.tableJumps = new aws_dynamodb.Table(this, "jumps", {
+    this.tableJumps = new aws_dynamodb.Table(this, 'jumps', {
       partitionKey: {
-        name: "sourceKey",
+        name: 'sourceKey',
         type: AttributeType.STRING,
       },
       sortKey: {
-        name: "kindKey",
+        name: 'kindKey',
         type: AttributeType.STRING,
       },
       removalPolicy: RemovalPolicy.DESTROY,
@@ -81,31 +86,31 @@ export class LogBookyStack extends Stack {
     });
 
     this.tableJumps.addGlobalSecondaryIndex({
-      indexName: "SpecificJump",
+      indexName: 'SpecificJump',
       partitionKey: {
-        name: "kindKey",
+        name: 'kindKey',
         type: AttributeType.STRING,
       },
       projectionType: ProjectionType.INCLUDE,
       nonKeyAttributes: [
-        "sourceKey",
-        "date",
-        "locale",
-        "aircraft",
-        "exitAltitude",
-        "jumperName",
-        "jumperPhoto",
-        "jumperLiscense",
+        'sourceKey',
+        'date',
+        'locale',
+        'aircraft',
+        'exitAltitude',
+        'jumperName',
+        'jumperPhoto',
+        'jumperLiscense',
       ],
     });
 
-    this.tableSignatures = new aws_dynamodb.Table(this, "signatures", {
+    this.tableSignatures = new aws_dynamodb.Table(this, 'signatures', {
       partitionKey: {
-        name: "userKey",
+        name: 'userKey',
         type: AttributeType.STRING,
       },
       sortKey: {
-        name: "signatureKey",
+        name: 'signatureKey',
         type: AttributeType.STRING,
       },
       billingMode: BillingMode.PAY_PER_REQUEST,
@@ -114,7 +119,7 @@ export class LogBookyStack extends Stack {
   }
 
   createCognito() {
-    this.cognitoUserPool = new aws_cognito.UserPool(this, "Cognito", {
+    this.cognitoUserPool = new aws_cognito.UserPool(this, 'Cognito', {
       selfSignUpEnabled: true,
       removalPolicy: RemovalPolicy.DESTROY,
       passwordPolicy: {
@@ -133,7 +138,7 @@ export class LogBookyStack extends Stack {
       userVerification: {
         emailBody:
           'O código de verificação da sua conta no <a href="https://log-booky.codermarcos.zone/confirmar">log booky</a> é {####}',
-        emailSubject: "Código de verificação log booky",
+        emailSubject: 'Código de verificação log booky',
         emailStyle: VerificationEmailStyle.CODE,
       },
       standardAttributes: {
@@ -147,7 +152,7 @@ export class LogBookyStack extends Stack {
     const callbackUrls = [this.props.env.frontendHost];
 
     this.cognitoUserPoolClient = this.cognitoUserPool.addClient(
-      "CognitoUserClient",
+      'CognitoUserClient',
       {
         authFlows: {
           userPassword: true,
@@ -175,23 +180,25 @@ export class LogBookyStack extends Stack {
         ],
       }
     );
+  }
 
+  createRole() {
     this.userRoleAuthenticated = new aws_iam.Role(
       this,
-      "CognitoAuthenticatedRole",
+      'CognitoAuthenticatedRole',
       {
         assumedBy: new aws_iam.FederatedPrincipal(
-          "cognito-identity.amazonaws.com",
+          'cognito-identity.amazonaws.com',
           {
             StringEquals: {
-              "cognito-identity.amazonaws.com:aud":
+              'cognito-identity.amazonaws.com:aud':
                 this.cognitoIdentityPool.ref,
             },
-            "ForAnyValue:StringLike": {
-              "cognito-identity.amazonaws.com:amr": "authenticated",
+            'ForAnyValue:StringLike': {
+              'cognito-identity.amazonaws.com:amr': 'authenticated',
             },
           },
-          "sts:AssumeRoleWithWebIdentity"
+          'sts:AssumeRoleWithWebIdentity'
         ),
       }
     );
@@ -199,14 +206,34 @@ export class LogBookyStack extends Stack {
     this.userRoleAuthenticated.addToPolicy(
       new aws_iam.PolicyStatement({
         effect: aws_iam.Effect.ALLOW,
-        actions: ["cognito-sync:*"],
-        resources: ["*"],
+        actions: ['cognito-sync:*'],
+        resources: ['*'],
       })
     );
 
+    this.userRoleAuthenticated.addToPolicy(
+      new aws_iam.PolicyStatement({
+        effect: aws_iam.Effect.ALLOW,
+        actions: ['dynamodb:*'],
+        // actions: ['dynamodb:GetItem', 'dynamodb:PutItem', 'dynamodb:Query'],
+        resources: [this.tableJumps.tableArn, this.tableSignatures.tableArn],
+        // conditions: {
+        //   'ForAllValues:StringEquals': {
+        //     'dynamodb:LeadingKeys': [
+        //       'USER#${cognito-identity.amazonaws.com:sub}',
+        //     ],
+        //   },
+        // },
+      })
+    );
+
+    this.tableJumps.grant(this.userRoleAuthenticated);
+  }
+
+  attachRole() {
     new aws_cognito.CfnIdentityPoolRoleAttachment(
       this,
-      "RoleAttachCognitoIdentity",
+      'RoleAttachCognitoIdentity',
       {
         identityPoolId: this.cognitoIdentityPool.ref,
         roles: {
